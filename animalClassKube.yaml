@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: animal-training
+  namespace: user-aperkel1
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: animal-trainer
+          image: 'vault.habana.ai/gaudi-docker/1.24.0/ubuntu24.04/habanalabs/pytorch-installer-2.10.0'
+          command: ["python", "/home/aperkel1/animalClass/animalClassK8/animalClassifierK8.py"]
+          env:
+            - name: HABANA_LOGS
+              value: "/home/aperkel1/habana_logs"
+            - name: PT_HPU_LAZY_MODE
+              value: "1"
+          resources:
+            limits:
+              habana.ai/gaudi: 1
+              memory: 32Gi
+              cpu: "8"
+            requests:
+              habana.ai/gaudi: 1
+              memory: 32Gi
+              cpu: "8"
+
+
+
+
+ 
