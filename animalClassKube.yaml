@@ -10,23 +10,42 @@ spec:
       containers:
         - name: animal-trainer
           image: 'vault.habana.ai/gaudi-docker/1.24.0/ubuntu24.04/habanalabs/pytorch-installer-2.10.0'
-          command: ["python", "/home/aperkel1/animalClass/animalClassK8/animalClassifierK8.py"]
+          command: ["/bin/sh", "-c"]
+          args: 
+            - >-
+              apt-get update && apt-get install -y git unzip &&
+              pip install kaggle &&
+              git clone https://github.com/aperkel1-del/animal-class-k8s.git /workspace &&
+              kaggle datasets download likhon148/animal-data -p /data &&
+              ls /data &&
+              unzip /data/animal-data.zip -d /data &&
+              python /workspace/animalClassifierK8.py
           env:
             - name: HABANA_LOGS
-              value: "/home/aperkel1/habana_logs"
+              value: "/workspace/habana_logs"
             - name: PT_HPU_LAZY_MODE
               value: "1"
+            - name: KAGGLE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: kaggle-credentials
+                  key: KAGGLE_USERNAME
+            - name: KAGGLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kaggle-credentials
+                  key: KAGGLE_KEY
           resources:
             limits:
-              habana.ai/gaudi: 1
-              memory: 32Gi
+              habana.ai/gaudi: "1"
+              memory: "32Gi"
               cpu: "8"
             requests:
-              habana.ai/gaudi: 1
-              memory: 32Gi
+              habana.ai/gaudi: "1"
+              memory: "32Gi"
               cpu: "8"
 
 
 
 
- 
+             
