@@ -8,8 +8,8 @@ import torch.optim as optim
 
 device = torch.device("hpu")
 
-DATA_DIR = '/home/aperkel1/animalClass/splitData'
-OUTPUT_DIR = '/home/aperkel1/animalClass/animalClassGaudi/checkpoint'
+DATA_DIR = '/data/animal_data'
+OUTPUT_DIR = '/workspace/checkpoint'
 EPOCHS = 10
 BATCH_SIZE = 15
 LR = 1e-4
@@ -21,14 +21,19 @@ transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std),
     ])
+full_dataset = datasets.ImageFolder(DATA_DIR, transform = transform)
 
-train_dataset = datasets.ImageFolder(os.path.join(DATA_DIR, 'train'), transform=transform)
-val_dataset   = datasets.ImageFolder(os.path.join(DATA_DIR, 'val'),   transform=transform)
+val_fraction = 0.2
+val_size = int(len(full_dataset) * val_fraction)
+train_size = len(full_dataset) - val_size
+
+train_dataset, val_dataset = torch.utils.data.random_split(full_dataset, [train_size, val_size])
+
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle = True, num_workers=NUM_WORKERS)
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle = False, num_workers=NUM_WORKERS)
 
-class_names = train_dataset.classes
+class_names = full_dataset.classes
 num_classes = len(class_names)
 print(f"Classes: {class_names}")
 print(f"Train images: {len(train_dataset)}")
