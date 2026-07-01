@@ -1,4 +1,5 @@
 import os
+import time
 import habana_frameworks.torch.core as htcore
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
@@ -59,15 +60,14 @@ optimizer = optim.AdamW(model.parameters(), lr=LR)
 
 best_val_acc=0.0
 
+start_time = time.perf_counter()
+
 for epoch in range(1, EPOCHS+1):
     print(f"═══ Epoch {epoch}/{EPOCHS} ═══")
 
     model.train()
     for i, (images, labels) in enumerate(train_loader):
         images, labels = images.to(device), labels.to(device)
-
-        print(f"Images device: {images.device}")
-        print(f"Labels device: {labels.device}")
 
         optimizer.zero_grad()
         with torch.autocast(device_type="hpu", dtype=torch.bfloat16):
@@ -107,5 +107,11 @@ for epoch in range(1, EPOCHS+1):
         model = model.to(device)
         htcore.mark_step()
         print(f"  ★ New best model saved ({val_acc:.2f}%)\n")
+
+end_time = time.perf_counter()
+elapsed_time = end_time - start_time
+
+with open('/workspace/checkpoint/output.txt', 'a') as f:
+    print(elapsed_time)
 
 print(f"Done! Best validation accuracy: {best_val_acc:.2f}%")
