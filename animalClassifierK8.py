@@ -91,10 +91,8 @@ for epoch in range(1, EPOCHS+1):
     total_correct = 0
     with torch.no_grad():
         for images, labels in val_loader:
-            images, labels = images.to(device), labels.to(device)
             with torch.autocast(device_type="hpu", dtype=torch.bfloat16):
                 outputs = model(images)
-            htcore.mark_step()
             _,  predicted = outputs.max(1)
             total_correct += predicted.eq(labels).sum().item()
 
@@ -105,13 +103,13 @@ for epoch in range(1, EPOCHS+1):
         best_val_acc = val_acc
         torch.save(model.cpu().state_dict(), os.path.join(OUTPUT_DIR, 'best_model.pth'))
         model = model.to(device)
-        htcore.mark_step()
         print(f"  ★ New best model saved ({val_acc:.2f}%)\n")
 
+htcore.mark_step()
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
 
 with open('/workspace/checkpoint/output.txt', 'a') as f:
-    print(elapsed_time)
+    print(elapsed_time, file=f)
 
 print(f"Done! Best validation accuracy: {best_val_acc:.2f}%")
