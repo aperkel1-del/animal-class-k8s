@@ -12,9 +12,9 @@ device = torch.device("hpu")
 DATA_DIR = '/data/animal_data'
 OUTPUT_DIR = '/workspace/checkpoint'
 EPOCHS = 10
-BATCH_SIZE = 15
+BATCH_SIZE = 32
 LR = 1e-4
-NUM_WORKERS = 2
+NUM_WORKERS = 4
 
 mean = [0.485, 0.456, 0.406]
 std  = [0.229, 0.224, 0.225]
