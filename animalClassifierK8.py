@@ -91,11 +91,12 @@ for epoch in range(1, EPOCHS+1):
     total_correct = 0
     with torch.no_grad():
         for images, labels in val_loader:
+            images, labels = images.to(device), labels.to(device)
             with torch.autocast(device_type="hpu", dtype=torch.bfloat16):
                 outputs = model(images)
             _,  predicted = outputs.max(1)
             total_correct += predicted.eq(labels).sum().item()
-
+    htcore.mark_step()
     val_acc = total_correct / len(val_dataset) * 100
     print(f"\n  ✓ Validation Accuracy: {val_acc:.2f}%\n")
 
@@ -105,7 +106,6 @@ for epoch in range(1, EPOCHS+1):
         model = model.to(device)
         print(f"  ★ New best model saved ({val_acc:.2f}%)\n")
 
-htcore.mark_step()
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
 
